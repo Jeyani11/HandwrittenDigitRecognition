@@ -1,0 +1,1 @@
+At first i used  MSE for the loss function but it didn't learn correctly with it because the the gradient is too low (close  to zeros) whereas the binary cross entropy gives a way bigger gradient for classification. So the learning is more efficient
