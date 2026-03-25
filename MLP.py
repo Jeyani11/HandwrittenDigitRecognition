@@ -6,14 +6,17 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from torchvision.transforms import ToTensor
 import matplotlib.pyplot as plt
-
+import torchvision.models as models
 import numpy as np
 
-# Hyperparameters
+# -------- Hyperparameters ---------------------
 
 data_path = "./data"
 learning_rate = 0.01
+batch_size = 64
+epochs = 10
 
+# -------- Data ---------------------
 train_dataset = datasets.MNIST( #training dataset load
     root=data_path,
     train=True,                 #train
@@ -30,18 +33,18 @@ test_dataset = datasets.MNIST( #testing dataset load
 
 train_loader = DataLoader(
     train_dataset,
-    batch_size=64,
+    batch_size= batch_size,
     shuffle=True
 )
 
 test_loader = DataLoader(
-    test_dataset, batch_size=64,
+    test_dataset, batch_size= batch_size,
     shuffle= False
 )
 
 print(f'Train Loader : {train_dataset}')
 
-# Visualize the data
+# -------- Visualisation ---------------------
 
 # Plot that shows 9 images from the dataset taken randomly
 figure = plt.figure(figsize=(8, 8))
@@ -55,7 +58,7 @@ for i in range(1, cols * rows + 1):
     plt.imshow(img.squeeze())
 plt.show()
 
-# Define the network
+# -------- Network ---------------------
 class MLP(nn.Module):
     def __init__(self):
        super().__init__() # que fait cette ligne c'est qoi deja super
@@ -71,19 +74,19 @@ class MLP(nn.Module):
     def forward(self,x):
         return self.layers(x)
 
-# Initialisation
+# -------- Initialisation ---------------------
 device = torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else "cpu"
 print(f"Using {device} device")
 
 
-model = MLP().to(device)
+model = MLP().to(device) # What does this line do ?
 print(model)
-loss_fn = nn.CrossEntropyLoss()
+loss_fn = nn.CrossEntropyLoss() 
 
-#Optimization is the process of adjusting model parameters to reduce model error in each training step.
+# Optimization is the process of adjusting model parameters to reduce model error in each training step.
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-# Training the model
+# -------- Training ---------------------
 def train(dataloader,model, loss_fn, optimizer):
     
     size = len(dataloader.dataset)
@@ -103,6 +106,7 @@ def train(dataloader,model, loss_fn, optimizer):
             print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
 
 
+# -------- Evaluation ---------------------
 def test(dataloader, model, loss_fn):
     # Set the model to evaluation mode - important for batch normalization and dropout layers
     # Unnecessary in this situation but added for best practices
@@ -125,15 +129,16 @@ def test(dataloader, model, loss_fn):
 
 
 
-# Evaluation
-
-
-# Saving the model
-
 if __name__=="__main__":
-    epochs = 10
+    
     for t in range(epochs):
         print(f"Epoch {t+1}\n-------------------------------")
         train(train_loader, model, loss_fn, optimizer)
         test(test_loader, model, loss_fn)
+
+ # -------- Save the Model ---------------------       
+    model = models.vgg16(weights='IMAGENET1K_V1')
+    torch.save(model.state_dict(), 'model_weights.pth')
+
+
     print("Done!")
