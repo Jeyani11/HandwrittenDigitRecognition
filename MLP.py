@@ -61,7 +61,7 @@ plt.show()
 # -------- Network ---------------------
 class MLP(nn.Module):
     def __init__(self):
-       super().__init__() # que fait cette ligne c'est qoi deja super
+       super().__init__() 
        self.layers = nn.Sequential(
             nn.Flatten(), # 28 x 28  => 784 converting multi-dimensional tensors into lower-dimensional forms
             nn.Linear(784, 128),  # 784 inputs
@@ -135,10 +135,16 @@ if __name__=="__main__":
         print(f"Epoch {t+1}\n-------------------------------")
         train(train_loader, model, loss_fn, optimizer)
         test(test_loader, model, loss_fn)
+    print("Done!")
 
  # -------- Save the Model ---------------------       
-    model = models.vgg16(weights='IMAGENET1K_V1')
     torch.save(model.state_dict(), 'model_weights.pth')
 
+ # -------- Reload the model -------------------
+    model_loaded = MLP().to(device)
+    model_loaded.load_state_dict(torch.load('model_weights.pth', weights_only= True))
+    model_loaded.eval()
+    print("Model reloaded successfully")
 
-    print("Done!")
+
+    
